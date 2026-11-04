@@ -2,6 +2,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Rigidbody2D), typeof(SpriteRenderer))]
 public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerActions
 {
     [Header("References")]
@@ -25,8 +26,18 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
         inputActions.Player.SetCallbacks(this);
 	}
 
-    void OnEnable() => inputActions.Player.Enable();
-    void OnDisable() => inputActions.Player.Disable();
+    void OnEnable()
+    {
+        inputActions.Player.Enable();
+
+        GameEvents.OnGravityFlipped += FlipGravity;
+	}
+    
+    void OnDisable()
+    {
+        inputActions.Player.Disable();
+        GameEvents.OnGravityFlipped -= FlipGravity;
+	}
 
 
 
