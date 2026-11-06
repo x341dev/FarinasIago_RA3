@@ -3,9 +3,12 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
+    
+    
 
     // ==== References ====
-    GameObject player;
+    [SerializeField] private GameObject playerPrefab;
+    private GameObject player;
 
     // Constants
     private const float deathDelay = 2f;
@@ -52,9 +55,18 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // Get the player from the scene
-        player = GameObject.FindGameObjectWithTag("Player");
-    }
+		// Get the player from the scene if not assigned in the inspector
+		GameObject scenePlayer = GameObject.FindGameObjectWithTag("Player");
+        if (scenePlayer != null)
+		{
+			player = scenePlayer;
+		}
+		else
+		{
+            GameObject spawnPosition = GameObject.FindGameObjectWithTag("SpawnPosition");
+			player = Instantiate(playerPrefab, spawnPosition.transform.position, Quaternion.identity);
+		}
+	}
 
     void Update()
     {
