@@ -16,8 +16,6 @@ public class GameManager : MonoBehaviour
 	// Respawn
 	private Vector3 respawnPosition;
     private bool respawnFlipped;
-	// Player
-    private bool playerDied = false;
 
 	//Coroutine
     private Coroutine respawnRoutine;
