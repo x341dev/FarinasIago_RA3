@@ -5,7 +5,10 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody2D), typeof(SpriteRenderer))]
 public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerActions
 {
-    [Header("References")]
+    [Header("Settings")]
+	[SerializeField] private float moveSpeed = 5f;
+
+	[Header("References")]
     [SerializeField] private Transform groundCheck;
 
 	InputSystem_Actions inputActions;
@@ -14,7 +17,7 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
     SpriteRenderer spriteRenderer;
 
     Vector2 directionalMoveInput;
-    bool isGravityFlipped = false;
+    public bool isGravityFlipped { get; private set; } = false;
     bool isGrounded;
 
     BoxCollider2D groundCheckCollider;
@@ -51,7 +54,7 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
 
     void Update()
     {
-        rb.linearVelocity = new Vector2(directionalMoveInput.x * 5f, rb.linearVelocity.y);
+        rb.linearVelocity = new Vector2(directionalMoveInput.x * moveSpeed, rb.linearVelocity.y);
 
     }
 
@@ -68,12 +71,14 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
 		FlipGravity();
 	}
 
-    private void FlipGravity()
+    public void FlipGravity()
     {
         isGravityFlipped = !isGravityFlipped;
 
-        rb.gravityScale = isGravityFlipped ? -1f : 1f;
-        spriteRenderer.flipY = isGravityFlipped;
+        if (isGravityFlipped) rb.gravityScale = -Mathf.Abs(rb.gravityScale);
+		else rb.gravityScale = Mathf.Abs(rb.gravityScale);
+
+		spriteRenderer.flipY = isGravityFlipped;
 
         groundCheckCollider.offset = new Vector2(0, -groundCheckCollider.offset.y);
 	}
