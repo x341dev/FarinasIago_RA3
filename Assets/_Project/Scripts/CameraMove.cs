@@ -15,12 +15,20 @@ public class CameraMove : MonoBehaviour
 		if (camera == null) camera = Camera.main;
 	}
 
+    private void Start()
+    {
+		// Set the initial camera position to the first zone
+		MoveCamera(0);
+	}
+
     private void MoveCamera(int zone)
 	{
 		if (camera == null || cameraPositions == null) return;
 
-		float x = cameraPositions.transform.GetChild(zone).position.x;
-		float y = cameraPositions.transform.GetChild(zone).position.y;
+		GameObject cameraPosition = cameraPositions.transform.GetChild(zone).gameObject;
+
+		float x = cameraPosition.transform.position.x;
+		float y = cameraPosition.transform.position.y;
 		camera.transform.position = new Vector3(x, y, camera.transform.position.z);
 	}
 }
