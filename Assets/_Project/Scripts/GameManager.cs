@@ -1,11 +1,10 @@
+using System.Collections;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
     
-    
-
     // ==== References ====
     [SerializeField] private GameObject playerPrefab;
     private GameObject player;
@@ -20,9 +19,8 @@ public class GameManager : MonoBehaviour
 	// Player
     private bool playerDied = false;
 
-    // Timers
-    private float deathTimer = 0f;
-
+	//Coroutine
+    private Coroutine respawnRoutine;
 
 	// Subscribe from events
 	private void OnEnable()
@@ -68,19 +66,6 @@ public class GameManager : MonoBehaviour
 		}
 	}
 
-    void Update()
-    {
-        if (playerDied)
-		{
-			deathTimer += Time.deltaTime;
-			if (deathTimer >= deathDelay)
-			{
-				RespawnPlayer();
-				deathTimer = 0f;
-			}
-		}
-	}
-
     public void FlipGravity()
     {
         GameEvents.GravityFlipped();
@@ -96,16 +81,23 @@ public class GameManager : MonoBehaviour
     {
         if (player == null) return;
         player.SetActive(false);
-        playerDied = true;
+
+        if (respawnRoutine != null) StopCoroutine(respawnRoutine);
+        respawnRoutine = StartCoroutine(RespawnAfterDelay());
+	}
+
+    private IEnumerator RespawnAfterDelay()
+    {
+        yield return new WaitForSeconds(deathDelay);
+        RespawnPlayer();
+        respawnRoutine = null;
 	}
 
     public void RespawnPlayer()
     { 
-        if (player == null) return;     
+        if (player == null) return;
 
-		playerDied = false;
-		player.SetActive(true);
-
+        player.SetActive(true);
 		player.transform.position = respawnPosition;
 
 		GameEvents.GravityFlippedStateChanged(respawnFlipped);
