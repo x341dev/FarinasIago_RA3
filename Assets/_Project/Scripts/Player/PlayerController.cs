@@ -73,8 +73,10 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
             rb.gravityScale = Mathf.Abs(rb.gravityScale);
 			groundCheckCollider.offset = new Vector2(0, -Mathf.Abs(groundCheckCollider.offset.y));
 		}
+
 		sr.flipY = isGravityFlipped;
-		
+        sr.flipX = directionalMoveInput.x < 0;
+
         animator.SetBool("Falling", Mathf.Abs(rb.linearVelocity.y) > 0.1f);
         animator.SetFloat("Velocity", Mathf.Abs(rb.linearVelocity.x));
 
