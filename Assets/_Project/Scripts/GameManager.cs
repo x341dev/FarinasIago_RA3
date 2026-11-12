@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
 	// Respawn
 	private Vector3 respawnPosition;
     private bool respawnFlipped;
+    public bool IsGamePaused { get; private set; } = false;
 
 	//Coroutine
     private Coroutine respawnRoutine;
@@ -25,14 +26,16 @@ public class GameManager : MonoBehaviour
     {
         GameEvents.OnCheckPointReached += SetRespawnPosition;
         GameEvents.OnPlayerDied += PlayerDie;
-	}
+        GameEvents.OnPauseToggleRequested += TogglePause;
+    }
 
 	// Unsubscribe from events
 	private void OnDisable()
     {
         GameEvents.OnCheckPointReached -= SetRespawnPosition;
 		GameEvents.OnPlayerDied -= PlayerDie;
-	}
+        GameEvents.OnPauseToggleRequested -= TogglePause;
+    }
 
     
 	void Awake()
@@ -41,6 +44,7 @@ public class GameManager : MonoBehaviour
 		if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
+            return;
         }
         else
         {
@@ -100,4 +104,12 @@ public class GameManager : MonoBehaviour
 
 		GameEvents.GravityFlippedStateChanged(respawnFlipped);
 	}
+
+    private void TogglePause()
+    {
+        IsGamePaused = !IsGamePaused;
+        Time.timeScale = IsGamePaused ? 0 : 1;
+
+        GameEvents.NotifyPauseStateChanged(IsGamePaused);
+    }
 }

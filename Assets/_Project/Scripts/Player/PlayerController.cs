@@ -23,10 +23,11 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
     // Data
     Vector2 directionalMoveInput;
     public bool isGravityFlipped { get; private set; } = false;
-    bool isGrounded;
 
-	// References
-	BoxCollider2D groundCheckCollider;
+    bool isGamePaused = false;
+
+    // References
+    BoxCollider2D groundCheckCollider;
     GroundCheck groundCheckComponent;
 
 	private void Awake()
@@ -41,14 +42,16 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
 
         GameEvents.OnGravityFlipped += FlipGravity;
         GameEvents.OnGravityFlippedStateChanged += SetGravityFlipped;
-	}
+        GameEvents.OnPauseStateChanged += HandlePauseStateChanged;
+    }
     
     void OnDisable()
     {
         inputActions.Player.Disable();
         GameEvents.OnGravityFlipped -= FlipGravity;
 		GameEvents.OnGravityFlippedStateChanged -= SetGravityFlipped;
-	}
+        GameEvents.OnPauseStateChanged -= HandlePauseStateChanged;
+    }
 
 
 
@@ -63,6 +66,8 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
 
     private void Update()
     {
+        if (isGamePaused) return;
+
         if (isGravityFlipped)
         {
             rb.gravityScale = -Mathf.Abs(rb.gravityScale);
@@ -90,16 +95,25 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
 
     public void OnMove(InputAction.CallbackContext context)
     {
-		directionalMoveInput = context.ReadValue<Vector2>();
+        if (!context.performed) return;
+        if (isGamePaused) return;
+        directionalMoveInput = context.ReadValue<Vector2>();
 
 	}
 
 	public void OnJump(InputAction.CallbackContext context)
     {
+        if (isGamePaused) return;
         if (!context.performed || !groundCheckComponent.IsGrounded) return;
 
 		FlipGravity();
 	}
+
+    public void OnPause(InputAction.CallbackContext context)
+    {
+        if (!context.performed) return;
+        GameEvents.RequestPauseToggle();
+    }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -116,4 +130,10 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
         float velocityY = isGravityFlipped ? Mathf.Abs(jumpForce) : -Mathf.Abs(jumpForce);
 		rb.linearVelocity = new Vector2(rb.linearVelocity.x, velocityY);
 	}
+
+    private void HandlePauseStateChanged(bool isPaused)
+    {
+        isGamePaused = isPaused;
+        if (isGamePaused) directionalMoveInput = Vector2.zero;
+    }
 }
