@@ -43,6 +43,7 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
         GameEvents.OnGravityFlipped += FlipGravity;
         GameEvents.OnGravityFlippedStateChanged += SetGravityFlipped;
         GameEvents.OnPauseStateChanged += HandlePauseStateChanged;
+        GameEvents.OnLevelCompleted += SetPausedState;
     }
     
     void OnDisable()
@@ -51,6 +52,7 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
         GameEvents.OnGravityFlipped -= FlipGravity;
 		GameEvents.OnGravityFlippedStateChanged -= SetGravityFlipped;
         GameEvents.OnPauseStateChanged -= HandlePauseStateChanged;
+        GameEvents.OnLevelCompleted -= SetPausedState;
     }
 
 
@@ -80,7 +82,8 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
 		}
 
 		sr.flipY = isGravityFlipped;
-        sr.flipX = directionalMoveInput.x < 0;
+        if (directionalMoveInput.x != 0)
+            sr.flipX = directionalMoveInput.x < 0;
 
         animator.SetBool("Falling", Mathf.Abs(rb.linearVelocity.y) > 0.1f);
         animator.SetFloat("Velocity", Mathf.Abs(rb.linearVelocity.x));
@@ -95,7 +98,6 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        if (!context.performed) return;
         if (isGamePaused) return;
         directionalMoveInput = context.ReadValue<Vector2>();
 
@@ -123,6 +125,14 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
 		}
 	}
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("LevelEnd"))
+        {
+            GameEvents.EndLevel();
+        }
+    }
+
     public void SetGravityFlipped(bool flipped) => isGravityFlipped = flipped;
     public void FlipGravity()
     {
@@ -135,5 +145,11 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
     {
         isGamePaused = isPaused;
         if (isGamePaused) directionalMoveInput = Vector2.zero;
+    }
+
+    private void SetPausedState()
+    {
+        isGamePaused = true;
+        directionalMoveInput = Vector2.zero;
     }
 }

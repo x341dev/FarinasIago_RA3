@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -24,17 +25,27 @@ public class GameManager : MonoBehaviour
 	// Subscribe from events
 	private void OnEnable()
     {
+        SceneManager.sceneLoaded += StartLevel;
+
         GameEvents.OnCheckPointReached += SetRespawnPosition;
         GameEvents.OnPlayerDied += PlayerDie;
         GameEvents.OnPauseToggleRequested += TogglePause;
+        GameEvents.OnLevelCompleted += LevelCompleted;
+        GameEvents.OnNextLevelRequested += HandleNextLevelRequest;
+        GameEvents.OnExitToMainMenuRequested += HandleExitToMainMenuRequest;
     }
 
 	// Unsubscribe from events
 	private void OnDisable()
     {
+        SceneManager.sceneLoaded -= StartLevel;
+
         GameEvents.OnCheckPointReached -= SetRespawnPosition;
 		GameEvents.OnPlayerDied -= PlayerDie;
         GameEvents.OnPauseToggleRequested -= TogglePause;
+        GameEvents.OnLevelCompleted -= LevelCompleted;
+        GameEvents.OnNextLevelRequested -= HandleNextLevelRequest;
+        GameEvents.OnExitToMainMenuRequested -= HandleExitToMainMenuRequest;
     }
 
     
@@ -53,20 +64,28 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    void Start()
+    private void Start()
     {
-		// Get the player from the scene if not assigned in the inspector
-		GameObject scenePlayer = GameObject.FindGameObjectWithTag("Player");
+        StartLevel(SceneManager.GetActiveScene(), LoadSceneMode.Single);
+    }
+
+    private void StartLevel(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.buildIndex == 0) return; // Skip the main menu scene
+        IsGamePaused = false;
+        Time.timeScale = 1;
+        GameEvents.NotifyPauseStateChanged(IsGamePaused);
+        GameObject scenePlayer = GameObject.FindGameObjectWithTag("Player");
         if (scenePlayer != null)
-		{
-			player = scenePlayer;
-		}
-		else
-		{
+        {
+            player = scenePlayer;
+        }
+        else
+        {
             GameObject spawnPosition = GameObject.FindGameObjectWithTag("SpawnPosition");
-			player = Instantiate(playerPrefab, spawnPosition.transform.position, Quaternion.identity);
-		}
-	}
+            player = Instantiate(playerPrefab, spawnPosition.transform.position, Quaternion.identity);
+        }
+    }
 
     public void FlipGravity()
     {
@@ -111,5 +130,21 @@ public class GameManager : MonoBehaviour
         Time.timeScale = IsGamePaused ? 0 : 1;
 
         GameEvents.NotifyPauseStateChanged(IsGamePaused);
+    }
+
+    private void LevelCompleted()
+    {
+        Time.timeScale = 0;
+    }
+
+    private void HandleNextLevelRequest()
+    {
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        SceneManager.LoadScene(currentSceneIndex + 1);
+    }
+
+    private void HandleExitToMainMenuRequest()
+    {
+        SceneManager.LoadScene(0);
     }
 }

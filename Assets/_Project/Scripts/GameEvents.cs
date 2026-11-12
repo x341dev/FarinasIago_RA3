@@ -12,6 +12,10 @@ public class GameEvents
     public static event Action OnPauseToggleRequested;
     public static event Action<bool> OnPauseStateChanged;
 
+    public static event Action OnLevelCompleted;
+    public static event Action OnNextLevelRequested;
+    public static event Action OnExitToMainMenuRequested;
+
 
     public static void GravityFlipped() => OnGravityFlipped?.Invoke();
 	public static void GravityFlippedStateChanged(bool isFlipped) => OnGravityFlippedStateChanged?.Invoke(isFlipped);
@@ -21,4 +25,8 @@ public class GameEvents
 
     public static void RequestPauseToggle() => OnPauseToggleRequested?.Invoke();
     public static void NotifyPauseStateChanged(bool isPaused) => OnPauseStateChanged?.Invoke(isPaused);
+
+    public static void EndLevel() => OnLevelCompleted?.Invoke();
+    public static void RequestNextLevel() => OnNextLevelRequested?.Invoke();
+    public static void RequestExitToMainMenu() => OnExitToMainMenuRequested?.Invoke();
 }

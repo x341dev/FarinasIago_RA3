@@ -8,8 +8,8 @@ public class UIManager : MonoBehaviour
 
     private Canvas currentUICanvas;
     private GameObject pausePanel;
+    private GameObject levelCompletedPanel;
 
-    private bool IsGamePaused = false;
 
     public static UIManager Instance { get; private set; }
 
@@ -33,6 +33,7 @@ public class UIManager : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
 
         GameEvents.OnPauseStateChanged += SetPauseMenuVisibility;
+        GameEvents.OnLevelCompleted += HandleLevelEnd;
     }
 
     private void OnDisable()
@@ -40,6 +41,7 @@ public class UIManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
 
         GameEvents.OnPauseStateChanged -= SetPauseMenuVisibility;
+        GameEvents.OnLevelCompleted -= HandleLevelEnd;
     }
 
 
@@ -59,6 +61,27 @@ public class UIManager : MonoBehaviour
         else
         {
             Debug.LogWarning("No GameCanvas found in the scene and no prefab assigned in UIManager.");
+            return;
+        }
+
+        pausePanel = currentUICanvas.transform.Find("PausePanel")?.gameObject;
+        if (pausePanel != null)
+        {
+            pausePanel.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning("PausePanel not found in the GameCanvas.");
+        }
+
+        levelCompletedPanel = currentUICanvas.transform.Find("LevelCompletedPanel")?.gameObject;
+        if (levelCompletedPanel != null)
+        {
+            levelCompletedPanel.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning("LevelCompletedPanel not found in the GameCanvas.");
         }
     }
 
@@ -78,5 +101,29 @@ public class UIManager : MonoBehaviour
     public void OnResumeButtonClicked()
     {
         GameEvents.RequestPauseToggle();
+    }
+
+    private void HandleLevelEnd()
+    {
+        
+        if (currentUICanvas == null) return;
+
+        if (levelCompletedPanel == null)
+        {
+            levelCompletedPanel = currentUICanvas.transform.Find("LevelCompletedPanel")?.gameObject;
+            if (levelCompletedPanel == null) return;
+        }
+
+        levelCompletedPanel.SetActive(true);
+    }
+
+    public void OnNextLevelButtonClicked()
+    {
+        GameEvents.RequestNextLevel();
+    }
+
+    public void OnExitToMainMenuButtonClicked()
+    {
+        GameEvents.RequestExitToMainMenu();
     }
 }
