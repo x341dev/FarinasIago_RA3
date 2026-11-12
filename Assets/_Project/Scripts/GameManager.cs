@@ -71,7 +71,10 @@ public class GameManager : MonoBehaviour
 
     private void StartLevel(Scene scene, LoadSceneMode mode)
     {
-        if (scene.buildIndex == 0) return; // Skip the main menu scene
+        int currentSceneIndex = scene.buildIndex;
+        int lastIndex = SceneManager.sceneCountInBuildSettings - 1;
+
+        if (currentSceneIndex == 0 || currentSceneIndex == lastIndex) return;
         IsGamePaused = false;
         Time.timeScale = 1;
         GameEvents.NotifyPauseStateChanged(IsGamePaused);
@@ -137,14 +140,19 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 0;
     }
 
-    private void HandleNextLevelRequest()
+    public void HandleNextLevelRequest()
     {
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
         SceneManager.LoadScene(currentSceneIndex + 1);
     }
 
-    private void HandleExitToMainMenuRequest()
+    public void HandleExitToMainMenuRequest()
     {
         SceneManager.LoadScene(0);
+    }
+
+    public void HandleQuitGameRequest()
+    {
+        Application.Quit();
     }
 }

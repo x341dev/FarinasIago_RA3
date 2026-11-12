@@ -47,7 +47,10 @@ public class UIManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.buildIndex == 0 ) return; // Skip the main menu scene
+        int currentSceneIndex = scene.buildIndex;
+        int lastIndex = SceneManager.sceneCountInBuildSettings - 1;
+
+        if (currentSceneIndex == 0 || currentSceneIndex == lastIndex) return;
 
         Canvas sceneCanvas = GameObject.FindWithTag("GameCanvas")?.GetComponent<Canvas>();
 
