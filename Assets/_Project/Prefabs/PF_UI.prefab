@@ -658,7 +658,7 @@ GameObject:
   - component: {fileID: 7396020709341887273}
   - component: {fileID: 879862876985236560}
   m_Layer: 5
-  m_Name: UI
+  m_Name: PF_UI
   m_TagString: GameCanvas
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

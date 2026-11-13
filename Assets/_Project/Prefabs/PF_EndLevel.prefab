@@ -14610,7 +14610,7 @@ GameObject:
   - component: {fileID: 2692181335965509123}
   - component: {fileID: 6605507735803664490}
   m_Layer: 0
-  m_Name: EndLevel
+  m_Name: PF_EndLevel
   m_TagString: LevelEnd
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
