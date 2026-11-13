@@ -35,6 +35,7 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
     GroundCheck groundCheckComponent;
 
     private Coroutine respawnRoutine;
+    private Coroutine startRoutine;
 
 	private void Awake()
     {
@@ -51,6 +52,7 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
         GameEvents.OnPauseStateChanged += HandlePauseStateChanged;
         GameEvents.OnLevelCompleted += SetPausedState;
         GameEvents.OnPlayerRespawned += Respawn;
+        GameEvents.OnLevelStarted += StartLevel;
 	}
     
     void OnDisable()
@@ -61,6 +63,7 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
         GameEvents.OnPauseStateChanged -= HandlePauseStateChanged;
         GameEvents.OnLevelCompleted -= SetPausedState;
         GameEvents.OnPlayerRespawned -= Respawn;
+        GameEvents.OnLevelStarted -= StartLevel;
     }
 
 
@@ -156,12 +159,13 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
 
 	private void Respawn()
 	{
+		if (respawnRoutine != null) StopCoroutine(respawnRoutine);
 		respawnRoutine = StartCoroutine(RespawnCoroutine());
 	}
 
 	private IEnumerator RespawnCoroutine()
 	{
-        spawnParticles.Play();
+		spawnParticles.Play();
 		yield return new WaitForSeconds(1.5f);
 		sr.enabled = true;
         rb.gravityScale = gravityScale;
@@ -170,6 +174,28 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
 
 		respawnRoutine = null;
 	}
+
+    private void StartLevel()
+    {
+
+        if (startRoutine != null) StopCoroutine(startRoutine);
+        startRoutine = StartCoroutine(StartLevelCoroutine());
+
+    }
+
+	private IEnumerator StartLevelCoroutine()
+	{
+		yield return new WaitForSeconds(0.1f); // Wait for load
+		sr.enabled = false;
+
+		HandlePauseStateChanged(true);
+
+		rb.gravityScale = 0;
+		rb.linearVelocity = Vector2.zero;
+
+        Respawn();
+	}
+
 
 
 	public void SetGravityFlipped(bool flipped) => isGravityFlipped = flipped;

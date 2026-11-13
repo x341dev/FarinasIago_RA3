@@ -87,7 +87,9 @@ public class GameManager : MonoBehaviour
         {
             GameObject spawnPosition = GameObject.FindGameObjectWithTag("SpawnPosition");
             player = Instantiate(playerPrefab, spawnPosition.transform.position, Quaternion.identity);
-        }
+            player.GetComponent<SpriteRenderer>().enabled = false;
+			GameEvents.LevelStarted();
+		}
     }
 
     public void FlipGravity()
