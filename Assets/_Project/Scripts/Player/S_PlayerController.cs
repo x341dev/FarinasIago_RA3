@@ -145,7 +145,9 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
 	{
 		dieParticles.Play();
         sr.enabled = false;
+
         rb.gravityScale = 0;
+        rb.linearVelocity = Vector2.zero;
 		
         HandlePauseStateChanged(true);
 
