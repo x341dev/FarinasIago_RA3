@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -8,9 +9,12 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
     [Header("Settings")]
 	[SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float jumpForce = 3f;
+    [SerializeField] private float gravityScale = 3f;
 
 	[Header("References")]
     [SerializeField] private Transform groundCheck;
+    [SerializeField] private ParticleSystem dieParticles;
+    [SerializeField] private ParticleSystem spawnParticles;
 
 	// New Input System
 	InputSystem_Actions inputActions;
@@ -30,6 +34,8 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
     BoxCollider2D groundCheckCollider;
     GroundCheck groundCheckComponent;
 
+    private Coroutine respawnRoutine;
+
 	private void Awake()
     {
         inputActions = new InputSystem_Actions();
@@ -44,7 +50,8 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
         GameEvents.OnGravityFlippedStateChanged += SetGravityFlipped;
         GameEvents.OnPauseStateChanged += HandlePauseStateChanged;
         GameEvents.OnLevelCompleted += SetPausedState;
-    }
+        GameEvents.OnPlayerRespawned += Respawn;
+	}
     
     void OnDisable()
     {
@@ -53,6 +60,7 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
 		GameEvents.OnGravityFlippedStateChanged -= SetGravityFlipped;
         GameEvents.OnPauseStateChanged -= HandlePauseStateChanged;
         GameEvents.OnLevelCompleted -= SetPausedState;
+        GameEvents.OnPlayerRespawned -= Respawn;
     }
 
 
@@ -121,7 +129,7 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
     {
         if (collision.gameObject.CompareTag("Death"))
 		{
-			GameEvents.PlayerDied();
+            Die();
 		}
 	}
 
@@ -133,7 +141,36 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
         }
     }
 
-    public void SetGravityFlipped(bool flipped) => isGravityFlipped = flipped;
+    private void Die()
+	{
+		dieParticles.Play();
+        sr.enabled = false;
+        rb.gravityScale = 0;
+		
+        HandlePauseStateChanged(true);
+
+		GameEvents.PlayerDied();
+	}
+
+	private void Respawn()
+	{
+		respawnRoutine = StartCoroutine(RespawnCoroutine());
+	}
+
+	private IEnumerator RespawnCoroutine()
+	{
+        spawnParticles.Play();
+		yield return new WaitForSeconds(1.5f);
+		sr.enabled = true;
+        rb.gravityScale = gravityScale;
+
+		HandlePauseStateChanged(false);
+
+		respawnRoutine = null;
+	}
+
+
+	public void SetGravityFlipped(bool flipped) => isGravityFlipped = flipped;
     public void FlipGravity()
     {
         isGravityFlipped = !isGravityFlipped;

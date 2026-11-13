@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
     private GameObject player;
 
     // Constants
-    private const float deathDelay = 2f;
+    private const float deathDelay = 1.5f;
 
 	// ==== Data ====
 	// Respawn
@@ -104,7 +104,6 @@ public class GameManager : MonoBehaviour
     public void PlayerDie()
     {
         if (player == null) return;
-        player.SetActive(false);
 
         if (respawnRoutine != null) StopCoroutine(respawnRoutine);
         respawnRoutine = StartCoroutine(RespawnAfterDelay());
@@ -121,9 +120,9 @@ public class GameManager : MonoBehaviour
     { 
         if (player == null) return;
 
-        player.SetActive(true);
 		player.transform.position = respawnPosition;
 
+        GameEvents.PlayerRespawned();
 		GameEvents.GravityFlippedStateChanged(respawnFlipped);
 	}
 
