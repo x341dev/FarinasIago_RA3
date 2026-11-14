@@ -53,7 +53,8 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
         GameEvents.OnLevelCompleted += SetPausedState;
         GameEvents.OnPlayerRespawned += Respawn;
         GameEvents.OnLevelStarted += StartLevel;
-	}
+        GameEvents.OnPlayerDied += Die;
+    }
     
     void OnDisable()
     {
@@ -64,6 +65,7 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
         GameEvents.OnLevelCompleted -= SetPausedState;
         GameEvents.OnPlayerRespawned -= Respawn;
         GameEvents.OnLevelStarted -= StartLevel;
+        GameEvents.OnPlayerDied -= Die;
     }
 
 
@@ -132,7 +134,7 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
     {
         if (collision.gameObject.CompareTag("Death"))
 		{
-            Die();
+            GameEvents.PlayerDied();
 		}
 	}
 
@@ -154,7 +156,6 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
 		
         HandlePauseStateChanged(true);
 
-		GameEvents.PlayerDied();
 	}
 
 	private void Respawn()
