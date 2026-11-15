@@ -16,13 +16,18 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
     [SerializeField] private ParticleSystem dieParticles;
     [SerializeField] private ParticleSystem spawnParticles;
 
-	// New Input System
-	InputSystem_Actions inputActions;
+    [Header("Audio clips")]
+    [SerializeField] private AudioClip jumpSound;
+    [SerializeField] private AudioClip dieSound;
+
+    // New Input System
+    InputSystem_Actions inputActions;
 
 	// Components
 	Rigidbody2D rb;
     SpriteRenderer sr;
     Animator animator;
+    Collider2D col;
 
     // Data
     Vector2 directionalMoveInput;
@@ -75,7 +80,8 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
         rb = GetComponent<Rigidbody2D>();
 		sr = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
-		groundCheckComponent = groundCheck.GetComponent<GroundCheck>();
+        col = GetComponent<Collider2D>();
+        groundCheckComponent = groundCheck.GetComponent<GroundCheck>();
 		groundCheckCollider = groundCheck.GetComponent<BoxCollider2D>();
 	}
 
@@ -121,7 +127,8 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
         if (isGamePaused) return;
         if (!context.performed || !groundCheckComponent.IsGrounded) return;
 
-		FlipGravity();
+        SoundManager.Instance.SFX.PlayOneShot(jumpSound);
+        FlipGravity();
 	}
 
     public void OnPause(InputAction.CallbackContext context)
@@ -153,7 +160,11 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
 
         rb.gravityScale = 0;
         rb.linearVelocity = Vector2.zero;
-		
+
+        col.enabled = false;
+
+        SoundManager.Instance.SFX.PlayOneShot(dieSound);
+
         HandlePauseStateChanged(true);
 
 	}
@@ -168,8 +179,10 @@ public class PlayerController : MonoBehaviour, InputSystem_Actions.IPlayerAction
 	{
 		spawnParticles.Play();
 		yield return new WaitForSeconds(1.5f);
-		sr.enabled = true;
+		
+        sr.enabled = true;
         rb.gravityScale = gravityScale;
+        col.enabled = true;
 
 		HandlePauseStateChanged(false);
 

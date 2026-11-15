@@ -5,10 +5,13 @@ public class TurretBehaviour : MonoBehaviour
 {
     [Header("Settings")]
     [SerializeField] private float fireRate = 1f;
+    [SerializeField] private float bulletSpeed = 5f;
 
     [Header("References")]
     [SerializeField] private Transform firePoint;
+    [SerializeField] private ParticleSystem fireParticles;
     [SerializeField] private BulletPool pool;
+
 
     private Coroutine fireRoutine;
 
@@ -25,8 +28,11 @@ public class TurretBehaviour : MonoBehaviour
         while (gameObject.activeInHierarchy)
         {
             GameObject bullet = pool.GetBullet(firePoint.position);
-            bullet.GetComponent<Bullet>().SetPool(pool);
-            bullet.GetComponent<Rigidbody2D>().linearVelocity = firePoint.up * 5f;
+            Bullet bulletScript = bullet.GetComponent<Bullet>();
+            Vector2 velocity = firePoint.up * bulletSpeed;
+            bulletScript.Init(pool, velocity);
+
+            fireParticles.Play();
 
             yield return new WaitForSeconds(1f / fireRate);
         }

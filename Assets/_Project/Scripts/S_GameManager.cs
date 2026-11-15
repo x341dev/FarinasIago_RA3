@@ -5,10 +5,18 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
-    
+
     // ==== References ====
+    [Header("References")]
     [SerializeField] private GameObject playerPrefab;
+
+    [Header("Audio Clips")]
+    [SerializeField] private AudioClip levelMusic;
+    [SerializeField] private AudioClip lobbyMusic;
+    [SerializeField] private AudioClip levelCompleteSound;
     private GameObject player;
+
+    
 
     // Constants
     private const float deathDelay = 1.5f;
@@ -74,7 +82,11 @@ public class GameManager : MonoBehaviour
         int currentSceneIndex = scene.buildIndex;
         int lastIndex = SceneManager.sceneCountInBuildSettings - 1;
 
-        if (currentSceneIndex == 0 || currentSceneIndex == lastIndex) return;
+        if (currentSceneIndex == 0 || currentSceneIndex == lastIndex)
+        {
+            SoundManager.Instance.Music.Play(lobbyMusic, true);
+            return;
+        }
         IsGamePaused = false;
         Time.timeScale = 1;
         GameEvents.NotifyPauseStateChanged(IsGamePaused);
@@ -90,6 +102,7 @@ public class GameManager : MonoBehaviour
             player.GetComponent<SpriteRenderer>().enabled = false;
 			GameEvents.LevelStarted();
 		}
+        SoundManager.Instance.Music.Play(levelMusic, true);
     }
 
     public void FlipGravity()
@@ -138,6 +151,7 @@ public class GameManager : MonoBehaviour
 
     private void LevelCompleted()
     {
+        SoundManager.Instance.SFX.PlayOneShot(levelCompleteSound);
         Time.timeScale = 0;
     }
 

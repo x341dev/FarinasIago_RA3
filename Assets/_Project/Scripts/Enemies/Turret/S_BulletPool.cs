@@ -1,34 +1,38 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class BulletPool : MonoBehaviour
 {
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private int initialSize = 10;
 
-    public static BulletPool Instance { get; private set; }
-
     private Stack<GameObject> freeBullets = new Stack<GameObject>();
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        else
-        {
-            Instance = this;
-        }
-        DontDestroyOnLoad(gameObject);
-
         for (int i = 0; i < initialSize; i++)
         { 
             freeBullets.Push(CreateNewBullet());
         }
     }
 
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        ReturnAllBullets();
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        ReturnAllBullets();
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        ReturnAllBullets();
+    }
 
     private GameObject CreateNewBullet()
     {
@@ -56,5 +60,16 @@ public class BulletPool : MonoBehaviour
     {
         bullet.SetActive(false);
         freeBullets.Push(bullet);
+    }
+
+    private void ReturnAllBullets()
+    {
+        foreach (Transform child in transform)
+        {
+            if (child.gameObject.activeInHierarchy)
+            {
+                ReturnBullet(child.gameObject);
+            }
+        }
     }
 }

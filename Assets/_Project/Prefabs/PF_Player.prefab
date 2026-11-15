@@ -10086,6 +10086,8 @@ MonoBehaviour:
   groundCheck: {fileID: 5607109033151455826}
   dieParticles: {fileID: 2143038973184264555}
   spawnParticles: {fileID: 921683066946298369}
+  jumpSound: {fileID: 8300000, guid: d1cb8d6c89563fe418c4f3be681e790e, type: 3}
+  dieSound: {fileID: 8300000, guid: 35d8f579f0b5b79408b9153063fdb732, type: 3}
 --- !u!95 &6381454420947129409
 Animator:
   serializedVersion: 7
